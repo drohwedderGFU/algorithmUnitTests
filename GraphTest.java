@@ -299,6 +299,17 @@ public class GraphTest
       {
          assertTrue(graph.toString().contains(Integer.toString(initialEdgeWeight--)));
       }
+      System.out.print(graph.toString());
+   }
+
+   @Test
+   public void testEdgeObjectCompareTo()
+   {
+      Graph.Edge edge0 = new Graph.Edge("source", "destination", 5);
+      Graph.Edge edge1 = new Graph.Edge("source", "destination", 6);
+
+      // Check that the compareTo method is properly implemented
+      assertTrue(edge0.compareTo(edge1) < 0);
 
    }
 
