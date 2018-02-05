@@ -3,6 +3,9 @@ import static org.hamcrest.Matchers.*;
 
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class GraphTest
 {
    public final int DEFAULT_WEIGHT = 2;
@@ -299,7 +302,6 @@ public class GraphTest
       {
          assertTrue(graph.toString().contains(Integer.toString(initialEdgeWeight--)));
       }
-      System.out.print(graph.toString());
    }
 
    @Test
@@ -310,6 +312,186 @@ public class GraphTest
 
       // Check that the compareTo method is properly implemented
       assertTrue(edge0.compareTo(edge1) < 0);
+
+   }
+
+   @Test
+   public void testMinSpanning()
+   {
+      Graph<Integer> sourceMinSpan = new Graph<Integer>(false);
+
+      int lowerCost = 4;
+
+      int higherCost = 20;
+
+      int numVertices = 100;
+
+      for (int i = 0; i  < numVertices; i++)
+      {
+         sourceMinSpan.addVertex(i);
+      }
+
+      for (int j = 0; j < numVertices; j++)
+      {
+         sourceMinSpan.addEdge(j, (j +  1) % numVertices, lowerCost);
+      }
+
+
+      for (int mod = 2; mod < 20; mod++)
+      {
+         for (int j = 0; j < numVertices; j++)
+         {
+            sourceMinSpan.addEdge(j, (j + mod) % numVertices, higherCost);
+         }
+      }
+
+      Graph<Integer> minSpanTree = sourceMinSpan.minimumSpanningTree();
+
+      for (Graph.Edge<Integer> edge : minSpanTree.getEdges())
+      {
+         assertThat(edge.getWeight(), is(equalTo(lowerCost)));
+      }
+
+      assertThat(minSpanTree.getEdges().size(), is(equalTo(numVertices - 1)));
+
+
+   }
+
+
+   @Test
+   public void testGetEdgesDirected()
+   {
+      Graph<Integer> checkDirectedEdges = new Graph<>(true);
+
+      int numVertices = 8;
+      for (int i = 0; i < numVertices; i++)
+      {
+         checkDirectedEdges.addVertex(i);
+      }
+
+      for (int j = 0; j < numVertices; j++)
+      {
+         checkDirectedEdges.addEdge(j, (j + 1) % numVertices,
+            j+1);
+         assertTrue(checkDirectedEdges.edgeExists(j, (j + 1) % numVertices));
+      }
+
+      List<Graph.Edge<Integer>> edgesDirected = checkDirectedEdges.getEdges();
+      assertThat(edgesDirected.size(), is(equalTo(numVertices)));
+      for (Graph.Edge<Integer> edge : edgesDirected)
+      {
+         assertTrue(checkDirectedEdges.edgeExists(edge.getSource(), edge.getDestination()));
+
+         assertThat(checkDirectedEdges.getEdgeWeight(edge.getSource(),
+            edge.getDestination()), is(equalTo(edge.getWeight())));
+
+         checkDirectedEdges.removeEdge(edge.getSource(), edge.getDestination());
+      }
+
+      assertThat(checkDirectedEdges.getEdges().size(), is(equalTo(0)));
+
+
+
+
+   }
+
+
+   @Test
+   public void testGetEdgesUndirected()
+   {
+      Graph<Integer> checkDirectedEdges = new Graph<>(false);
+
+      int numVertices = 8;
+      for (int i = 0; i < numVertices; i++)
+      {
+         checkDirectedEdges.addVertex(i);
+      }
+
+      for (int j = 0; j < numVertices; j++)
+      {
+         checkDirectedEdges.addEdge(j, (j + 1) % numVertices,
+            j+1);
+         assertTrue(checkDirectedEdges.edgeExists(j, (j + 1) % numVertices));
+      }
+
+      List<Graph.Edge<Integer>> edgesDirected = checkDirectedEdges.getEdges();
+      assertThat(checkDirectedEdges.getEdges().size(), is(equalTo(numVertices)));
+
+      for (Graph.Edge<Integer> edge : edgesDirected)
+      {
+         assertTrue(checkDirectedEdges.edgeExists(edge.getSource(), edge.getDestination()));
+
+         assertThat(checkDirectedEdges.getEdgeWeight(edge.getSource(),
+            edge.getDestination()), is(equalTo(edge.getWeight())));
+
+         checkDirectedEdges.removeEdge(edge.getSource(), edge.getDestination());
+      }
+
+      assertThat(checkDirectedEdges.getEdges().size(), is(equalTo(0)));
+
+
+
+
+   }
+
+
+   @Test
+   public void testGetEdgeDirected()
+   {
+      Graph<Integer> getAnEdge = new Graph<>(true);
+
+      int numVertices = 16;
+
+      for (int i = 0; i < numVertices; i++)
+      {
+         getAnEdge.addVertex(i);
+      }
+
+      for (int j = 0; j < numVertices; j++)
+      {
+         getAnEdge.addEdge(j, (j + 1) % numVertices, j + 1);
+      }
+      ArrayList<Graph.Edge<Integer>> edges = new ArrayList<>();
+      for (int k = 0; k < numVertices; k++)
+      {
+         edges.add(getAnEdge.getEdge(k, (k + 1) % numVertices));
+         assertThat(edges.get(k), is(notNullValue()));
+      }
+
+      assertTrue(getAnEdge.getEdge(1234, 4321) == null);
+
+   }
+
+   @Test public void testGetEdgeUndirected()
+   {
+      Graph<Integer> getAnEdge = new Graph<>(false);
+
+      int numVertices = 16;
+
+      for (int i = 0; i < numVertices; i++)
+      {
+         getAnEdge.addVertex(i);
+      }
+
+      for (int j = 0; j < numVertices; j++)
+      {
+         getAnEdge.addEdge(j, (j + 1) % numVertices, j + 1);
+      }
+      ArrayList<Graph.Edge<Integer>> edges = new ArrayList<>();
+      for (int k = 0; k < numVertices; k++)
+      {
+         edges.add(getAnEdge.getEdge(k, (k + 1) % numVertices));
+         assertThat(edges.get(k), is(notNullValue()));
+      }
+
+      assertTrue(getAnEdge.getEdge(1234, 4321) == null);
+
+      for (int l = numVertices - 1; l > 0; l--)
+      {
+         assertThat(getAnEdge.getEdge(l, l - 1), is(notNullValue()));
+         assertThat(getAnEdge.getEdgeWeight(l, l - 1),
+            is(equalTo(edges.get(l - 1).getWeight())));
+      }
 
    }
 
